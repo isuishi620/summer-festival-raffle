@@ -1,0 +1,25 @@
+{
+    "name": "${containerWorkspaceFolderBasename}",
+    "build": {
+        "context": ".",
+        "dockerfile": "Dockerfile"
+    },
+    
+    "containerEnv": {
+        "TZ": "Asia/Tokyo"
+    },
+
+    "forwardPorts": [3000],
+    
+    "remoteUser": "node",
+    "updateRemoteUserUID": true,
+    
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "esbenp.prettier-vscode",
+                "dbaeumer.vscode-eslint"
+            ]
+        }
+    }
+  }
