@@ -14,7 +14,7 @@ function shuffle<T>(array: T[]): T[] {
 
 // 履歴・キャッシュ機能は廃止
 
-export default function RaffleApp(): JSX.Element {
+export default function RaffleApp() {
   const [maxNumber, setMaxNumber] = useState<string>("");
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [availableNumbers, setAvailableNumbers] = useState<number[]>([]);
