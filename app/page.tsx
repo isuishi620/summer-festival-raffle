@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
+import Image from "next/image";
+import type { Options as ConfettiOptions } from "canvas-confetti";
 
 function shuffle<T>(array: T[]): T[] {
   const result = [...array];
@@ -22,18 +24,26 @@ export default function RaffleApp(): JSX.Element {
   const [justStarted, setJustStarted] = useState<boolean>(false);
   // Confetti overlay
   const cfRef = useRef<HTMLDivElement | null>(null);
-  const confettiInstanceRef = useRef<any>(null);
+  type ConfettiInstance = (opts?: ConfettiOptions) => Promise<void> | void;
+  type ConfettiCreator = (
+    root: HTMLCanvasElement | HTMLElement,
+    opts?: { resize?: boolean; useWorker?: boolean }
+  ) => ConfettiInstance;
+  type ConfettiModule = {
+    default: ConfettiInstance & { create: ConfettiCreator };
+    create?: ConfettiCreator;
+  };
+  const confettiInstanceRef = useRef<ConfettiInstance | null>(null);
 
   const launchConfetti = useCallback(async () => {
     const container = cfRef.current;
     if (!container) return;
     try {
-      const mod = await import("canvas-confetti");
-      const create = (mod as any).create ?? (mod as any).default?.create;
-      const confetti = (mod as any).default ?? (mod as any);
+      const mod = (await import("canvas-confetti")) as unknown as ConfettiModule;
+      const create: ConfettiCreator = mod.create ?? mod.default.create;
 
       // Ensure we have a canvas to render on
-      let canvas = container.querySelector("canvas");
+      let canvas = container.querySelector<HTMLCanvasElement>("canvas");
       if (!canvas) {
         canvas = document.createElement("canvas");
         canvas.style.width = "100%";
@@ -45,8 +55,7 @@ export default function RaffleApp(): JSX.Element {
       // Reuse instance if exists, else create
       let shoot = confettiInstanceRef.current;
       if (!shoot) {
-        const creator = create ? create : (confetti.create as any);
-        shoot = creator(canvas, { resize: true, useWorker: true });
+        shoot = create(canvas, { resize: true, useWorker: true });
         confettiInstanceRef.current = shoot;
       }
 
@@ -67,7 +76,7 @@ export default function RaffleApp(): JSX.Element {
         "#64ffda", // teal
         "#ff36ff", // fuchsia
       ];
-      const shapes = ["square", "circle"] as const;
+      const shapes: string[] = ["square", "circle"];
 
       // Kick-off burst in the center
       shoot({
@@ -76,7 +85,7 @@ export default function RaffleApp(): JSX.Element {
         startVelocity: 55,
         origin: { x: 0.5, y: 0.35 },
         colors,
-        shapes: shapes as any,
+        shapes,
         scalar: 1.2,
         gravity: 0.9,
         ticks: 220,
@@ -102,7 +111,7 @@ export default function RaffleApp(): JSX.Element {
           gravity: 0.9,
           drift: (Math.random() - 0.5) * 0.8,
           colors: burstColors,
-          shapes: shapes as any,
+          shapes,
           ticks: 220,
         });
         shoot({
@@ -115,7 +124,7 @@ export default function RaffleApp(): JSX.Element {
           gravity: 0.9,
           drift: (Math.random() - 0.5) * 0.8,
           colors: burstColors,
-          shapes: shapes as any,
+          shapes,
           ticks: 220,
         });
         if (Date.now() < end) requestAnimationFrame(frame);
@@ -226,7 +235,7 @@ export default function RaffleApp(): JSX.Element {
       setAvailableNumbers([]);
       setIsRolling(false);
     }
-  }, [availableNumbers, isDrawing, isRolling, maxNumber]);
+  }, [availableNumbers, isDrawing, isRolling, maxNumber, launchConfetti]);
 
   const maybePerformAction = useCallback(
     (key: string) => {
@@ -287,7 +296,7 @@ export default function RaffleApp(): JSX.Element {
                 }`}
                 aria-label="抽選"
               >
-                <img src="/icons/party_popper_flat.svg" alt="draw" className="w-24 h-24" />
+                <Image src="/icons/party_popper_flat.svg" alt="draw" width={96} height={96} className="w-24 h-24" />
               </button>
             </div>
 
