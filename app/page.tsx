@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import Image from "next/image";
-import type { Options as ConfettiOptions } from "canvas-confetti";
 
 function shuffle<T>(array: T[]): T[] {
   const result = [...array];
@@ -24,6 +23,21 @@ export default function RaffleApp(): JSX.Element {
   const [justStarted, setJustStarted] = useState<boolean>(false);
   // Confetti overlay
   const cfRef = useRef<HTMLDivElement | null>(null);
+  // Minimal confetti options used in this app (local type to avoid external typings)
+  type ConfettiOptions = {
+    particleCount?: number;
+    angle?: number;
+    spread?: number;
+    startVelocity?: number;
+    decay?: number;
+    gravity?: number;
+    drift?: number;
+    ticks?: number;
+    origin?: { x?: number; y?: number };
+    colors?: string[];
+    shapes?: string[];
+    scalar?: number;
+  };
   type ConfettiInstance = (opts?: ConfettiOptions) => Promise<void> | void;
   type ConfettiCreator = (
     root: HTMLCanvasElement | HTMLElement,
